@@ -3,6 +3,19 @@ AutomaticMusicTranscription
 
 Automatic music transcription using neural networks
 
+Installation
+------------
+**NOTE**: In order to install the `rtmidi` package that we depend on, you may need to install headers for some sound libraries. On Ubuntu Linux, this command should install the necessary packages:
+
+```bash
+sudo apt-get install build-essential libasound2-dev libjack-dev portaudio19-dev
+```
+
+Data
+------------
+- [MusicNet Dataset](https://www.kaggle.com/datasets/imsparsh/musicnet-dataset)
+- [The MAESTRO Dataset](https://magenta.tensorflow.org/datasets/maestro)
+
 Project Organization
 ------------
 
