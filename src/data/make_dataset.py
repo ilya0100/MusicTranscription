@@ -1,30 +1,56 @@
 # -*- coding: utf-8 -*-
-import click
-import logging
-from pathlib import Path
-from dotenv import find_dotenv, load_dotenv
+import os
+import pandas as pd
+
+from typing import Tuple
+from torch.utils.data import Dataset
+
+from src.entities.dataset_params import DatasetParams
 
 
-@click.command()
-@click.argument('input_filepath', type=click.Path(exists=True))
-@click.argument('output_filepath', type=click.Path())
-def main(input_filepath, output_filepath):
-    """ Runs data processing scripts to turn raw data from (../raw) into
-        cleaned data ready to be analyzed (saved in ../processed).
-    """
-    logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
+class WavMidiDataset(Dataset):
+    def __init__(self, params: DatasetParams) -> None:
+        super().__init__()
 
+        self._root_path = params.root_path
+        self._years = params.years_list
+        self._split = params.split
+        self._data = []
 
-if __name__ == '__main__':
-    log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(level=logging.INFO, format=log_fmt)
+        metadata_path = os.path.join(self._root_path, params.metadata)
+        ds_metadata = pd.read_csv(metadata_path)
 
-    # not used in this stub but often useful for finding various files
-    project_dir = Path(__file__).resolve().parents[2]
+        if self._split:
+            ds_metadata = ds_metadata[ds_metadata["split"] == self._split]
+        if len(self._years) > 0:
+            ds_metadata = ds_metadata[ds_metadata["year"].map(lambda x: x in self._years)]
 
-    # find .env automagically by walking up directories until it's found, then
-    # load up the .env entries as environment variables
-    load_dotenv(find_dotenv())
+        ds_metadata = ds_metadata[["midi_filename", "audio_filename"]]
 
-    main()
+        self._len = ds_metadata.shape[0]
+        self._data = ds_metadata
+
+    def _process_audio(self):
+        pass
+
+    def _process_midi(self):
+        pass
+
+    def __len__(self):
+        return self._len
+
+    def __getitem__(self, idx) -> Tuple:
+        midi_filename, audio_filename = self._data.iloc[idx]
+        
+        midi_path = os.path.join(self._root_path, midi_filename)
+        audio_path = os.path.join(self._root_path, audio_filename)
+
+        ns = self._process_midi(midi_path)
+        audio = self._process_audio(audio_path)
+        return audio, ns
+    
+    def _process_midi(self, midi_path: str):
+        pass
+
+    def _process_audio(self, audio_path: str):
+        pass
