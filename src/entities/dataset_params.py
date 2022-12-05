@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
+from src.entities.audio_params import AudioParams
+
 
 @dataclass
 class DatasetParams:
@@ -8,3 +10,4 @@ class DatasetParams:
     metadata: str
     years_list: List[int]
     split: Optional[str]
+    audio_params: AudioParams

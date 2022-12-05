@@ -10,6 +10,13 @@ Installation
 ```bash
 sudo apt-get install build-essential libasound2-dev libjack-dev portaudio19-dev
 ```
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+python setup.py install
+```
 
 Data
 ------------
