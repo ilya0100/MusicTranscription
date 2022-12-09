@@ -1,4 +1,5 @@
-import tensorflow as tf
+import librosa
+import numpy as np
 
 from typing import Iterable, List, Tuple
 from note_seq import NoteSequence
@@ -9,17 +10,20 @@ from src.entities.note import Note
 
 def make_frames(
     audio_signal: Iterable[float], params: AudioParams
-) -> Tuple[tf.Tensor, List[float]]:
-    frames = tf.signal.frame(
-        audio_signal,
-        frame_length=params.frame_length,
-        frame_step=params.frame_step,
-        pad_end=params.pad_end,
-        pad_value=params.pad_value,
+) -> Tuple[np.ndarray, List[float]]:
+    spectrogram = librosa.feature.melspectrogram(
+        y=audio_signal,
+        sr=params.sample_rate,
+        n_mels=params.n_mels,
+        fmin=params.fmin,
+        fmax=params.fmax,
+        n_fft=params.frame_length,
+        hop_length=params.frame_step,
+        window=params.window,
     )
-    # frame_time = frame_length / sample_rate
-    times = [params.frame_time * i for i in range(frames.shape[0])]
-    return frames, times
+    spectrogram = librosa.power_to_db(spectrogram)
+    times = [params.frame_time * i for i in range(spectrogram.shape[-1])]
+    return spectrogram, times
 
 
 def tokenize(

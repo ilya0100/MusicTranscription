@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 import os
+import numpy as np
 import pandas as pd
 import librosa
 import note_seq
-import tensorflow as tf
 
 from typing import Iterable, List, Tuple
 from torch.utils.data import Dataset
@@ -42,7 +41,7 @@ class WavMidiDataset(Dataset):
     def __len__(self):
         return self._len
 
-    def __getitem__(self, idx) -> Tuple[tf.Tensor, List[Note]]:
+    def __getitem__(self, idx) -> Tuple[np.ndarray, List[Note]]:
         midi_filename, audio_filename = self._data.iloc[idx]
 
         midi_path = os.path.join(self._root_path, midi_filename)
@@ -50,11 +49,18 @@ class WavMidiDataset(Dataset):
 
         frames, times = self._process_audio(audio_path, self._audio_params)
         notes = self._process_midi(midi_path, times)
+
+        assert frames.shape[-1] == len(notes)
+
         return frames, notes, times
 
     def _process_audio(self, audio_path: str, params: AudioParams):
         signal, _ = librosa.load(audio_path, sr=params.sample_rate)
-        return make_frames(signal, params)
+        frames, times = make_frames(signal, params)
+
+        assert frames.shape[-1] == len(times)
+
+        return frames, times
 
     def _process_midi(self, midi_path: str, times: Iterable[float]):
         ns = note_seq.midi_file_to_note_sequence(midi_path)
