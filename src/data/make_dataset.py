@@ -4,12 +4,11 @@ import pandas as pd
 import librosa
 import note_seq
 
-from typing import Iterable, List, Tuple
+from typing import Iterable, Tuple
 from torch.utils.data import Dataset
 
 from src.entities.dataset_params import DatasetParams
 from src.entities.audio_params import AudioParams
-from src.entities.note import Note
 from src.features.build_features import make_frames, tokenize
 
 
@@ -41,7 +40,7 @@ class WavMidiDataset(Dataset):
     def __len__(self):
         return self._len
 
-    def __getitem__(self, idx) -> Tuple[np.ndarray, List[Note]]:
+    def __getitem__(self, idx) -> Tuple[np.ndarray, Tuple[np.ndarray]]:
         midi_filename, audio_filename = self._data.iloc[idx]
 
         midi_path = os.path.join(self._root_path, midi_filename)
@@ -65,3 +64,20 @@ class WavMidiDataset(Dataset):
     def _process_midi(self, midi_path: str, times: Iterable[float]):
         ns = note_seq.midi_file_to_note_sequence(midi_path)
         return tokenize(ns, times, self._audio_params.frame_time)
+
+
+class AudioDataset(Dataset):
+    def __init__(self, frames: np.ndarray, notes: Tuple[np.ndarray]) -> None:
+        super().__init__()
+
+        assert frames.shape[-1] == len(notes)
+
+        self._frames = frames
+        self._notes = notes
+        self._len = len(notes)
+
+    def __len__(self):
+        return self._len
+
+    def __getitem__(self, index):
+        return self._frames[:, index], self._notes[index]
