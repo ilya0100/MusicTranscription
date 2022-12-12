@@ -75,7 +75,7 @@ class AudioDataset(Dataset):
     def __init__(self, frames: np.ndarray, notes: Tuple[np.ndarray]) -> None:
         super().__init__()
 
-        assert frames.shape[-1] == len(notes)
+        assert frames.shape[0] == len(notes)
 
         self._frames = frames
         self._notes = notes
@@ -85,4 +85,4 @@ class AudioDataset(Dataset):
         return self._len
 
     def __getitem__(self, index):
-        return self._frames[:, index], self._notes[index]
+        return np.expand_dims(self._frames[index], 0), self._notes[index]
