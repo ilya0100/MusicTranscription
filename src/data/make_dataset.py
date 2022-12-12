@@ -9,7 +9,7 @@ from torch.utils.data import Dataset
 
 from src.entities.dataset_params import DatasetParams
 from src.entities.audio_params import AudioParams
-from src.features.build_features import make_frames, tokenize
+from src.features.build_features import make_spectrogram, split_spectrogram, tokenize
 
 
 class WavMidiDataset(Dataset):
@@ -19,7 +19,13 @@ class WavMidiDataset(Dataset):
         self._root_path = params.root_path
         self._years = params.years_list
         self._split = params.split
-        self._audio_params = params.audio_params
+        self._params = params
+
+        self._hop_length = params.audio_params.frame_length // params.overlapping
+        self._frame_time = (
+            self._hop_length * params.feature_size / params.audio_params.sample_rate
+        )
+
         self._data = []
 
         metadata_path = os.path.join(self._root_path, params.metadata)
@@ -46,24 +52,23 @@ class WavMidiDataset(Dataset):
         midi_path = os.path.join(self._root_path, midi_filename)
         audio_path = os.path.join(self._root_path, audio_filename)
 
-        frames, times = self._process_audio(audio_path, self._audio_params)
-        notes = self._process_midi(midi_path, times)
+        frames = self._process_audio(audio_path, self._params.audio_params)
+        times = [self._frame_time * i for i in range(frames.shape[0])]
 
-        assert frames.shape[-1] == len(notes)
+        notes = self._process_midi(midi_path, times)
+        assert len(times) == len(notes)
 
         return frames, notes, times
 
     def _process_audio(self, audio_path: str, params: AudioParams):
         signal, _ = librosa.load(audio_path, sr=params.sample_rate)
-        frames, times = make_frames(signal, params)
-
-        assert frames.shape[-1] == len(times)
-
-        return frames, times
+        spectrogram = make_spectrogram(signal, params, self._hop_length)
+        frames = split_spectrogram(spectrogram, self._params.feature_size)
+        return frames
 
     def _process_midi(self, midi_path: str, times: Iterable[float]):
         ns = note_seq.midi_file_to_note_sequence(midi_path)
-        return tokenize(ns, times, self._audio_params.frame_time)
+        return tokenize(ns, times, self._frame_time)
 
 
 class AudioDataset(Dataset):
