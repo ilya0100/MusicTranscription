@@ -85,4 +85,8 @@ class AudioDataset(Dataset):
         return self._len
 
     def __getitem__(self, index):
-        return np.expand_dims(self._frames[index], 0), self._notes[index]
+        frames = np.expand_dims(self._frames[index], 0)
+        pitch = self._notes[index][0]
+        vels = self._notes[index][1]
+        notes_count = np.array([vels[vels > 0].size])
+        return frames, pitch, vels, notes_count
