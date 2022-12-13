@@ -88,5 +88,9 @@ class AudioDataset(Dataset):
         frames = np.expand_dims(self._frames[index], 0)
         pitch = self._notes[index][0]
         vels = self._notes[index][1]
-        notes_count = np.array([vels[vels > 0].size])
+        notes_count = vels[vels > 0].size
+        if vels[vels > 0].size > 0:
+            vels = vels[vels > 0].mean()
+        else:
+            vels = 0
         return frames, pitch, vels, notes_count
