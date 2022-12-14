@@ -82,7 +82,7 @@ def detokenize(
     for notes_inner, time in zip(notes, times):
         for pitch, velocity in zip(*notes_inner):
             if pitch == 128 or pitch == -1:
-                break
+                continue
             ns.notes.append(
                 NoteSequence.Note(
                     pitch=pitch,

@@ -218,17 +218,15 @@ class DummyNet(nn.Module):
             nn.Dropout(0.3),
             nn.Tanh(),
         )
-        self.pitch_layer = nn.Sequential(
-            nn.Linear(8192, 129),
-            nn.LogSoftmax(dim=1)
-        )
-#         self.velocity_layer = nn.Sequential(
-#             nn.Linear(2048, 1024),
-#             nn.Dropout(0.3),
-#             nn.Tanh(),
-#             nn.Linear(1024, 1),
-#         )
-#         self.count_layer = nn.Linear(2048, 1)
+        self.pitch_layer = nn.Sequential(nn.Linear(8192, 129), nn.LogSoftmax(dim=1))
+
+    #         self.velocity_layer = nn.Sequential(
+    #             nn.Linear(2048, 1024),
+    #             nn.Dropout(0.3),
+    #             nn.Tanh(),
+    #             nn.Linear(1024, 1),
+    #         )
+    #         self.count_layer = nn.Linear(2048, 1)
 
     def forward(self, x: torch.Tensor):
         x = self.conv_layer1(x)
@@ -244,8 +242,8 @@ class DummyNet(nn.Module):
 
         x = self.linear_layer(x)
         pitch = self.pitch_layer(x)
-#         velocity = self.velocity_layer(x)
-#         notes_count = self.count_layer(x)
+        #         velocity = self.velocity_layer(x)
+        #         notes_count = self.count_layer(x)
         velocity = torch.full((x.shape[0], 1), 80, device=device, dtype=float)
         notes_count = torch.full((x.shape[0], 1), 5, device=device, dtype=float)
         return pitch, velocity, notes_count
