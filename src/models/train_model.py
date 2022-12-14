@@ -9,7 +9,6 @@ class DummyNet(nn.Module):
             nn.Conv2d(1, 64, 3, padding=1),
             nn.Dropout(0.3),
             nn.Tanh(),
-
             nn.Conv2d(64, 64, 3, padding=1),
             nn.Dropout(0.3),
             nn.Tanh(),
@@ -18,7 +17,6 @@ class DummyNet(nn.Module):
             nn.Conv2d(64, 64, 3, padding=1),
             nn.Dropout(0.3),
             nn.Tanh(),
-
             nn.Conv2d(64, 64, 3, padding=1),
             nn.Dropout(0.3),
             nn.Tanh(),
@@ -34,7 +32,6 @@ class DummyNet(nn.Module):
             nn.Conv2d(128, 128, 3, padding=1),
             nn.Dropout(0.3),
             nn.Tanh(),
-
             nn.Conv2d(128, 128, 3, padding=1),
             nn.Dropout(0.3),
             nn.Tanh(),
@@ -43,7 +40,6 @@ class DummyNet(nn.Module):
             nn.Conv2d(128, 128, 3, padding=1),
             nn.Dropout(0.3),
             nn.Tanh(),
-
             nn.Conv2d(128, 128, 3, padding=1),
             nn.Dropout(0.3),
             nn.Tanh(),
@@ -56,7 +52,7 @@ class DummyNet(nn.Module):
             nn.Dropout(0.3),
             nn.Tanh(),
             nn.Linear(8000, 129),
-            nn.LogSoftmax(dim=1)
+            nn.LogSoftmax(dim=1),
         )
 
     def forward(self, x):

@@ -26,8 +26,6 @@ class WavMidiDataset(Dataset):
             self._hop_length * params.feature_size / params.audio_params.sample_rate
         )
 
-        self._data = []
-
         metadata_path = os.path.join(self._root_path, params.metadata)
         ds_metadata = pd.read_csv(metadata_path)
 

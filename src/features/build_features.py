@@ -69,12 +69,6 @@ def tokenize(
 
         notes.append((np.array(current_notes), np.array(current_velocities)))
 
-        # if single_note and len(notes[-1]) > 1:
-        #     notes[-1] = (
-        #         np.ndarray(current_notes[0]),
-        #         np.ndarray(current_velocities[0]),
-        #     )
-
     assert len(notes) == len(times)
     return notes
 
@@ -99,3 +93,45 @@ def detokenize(
             )
 
     return ns
+
+
+def join_splitted_notes(
+    ns: NoteSequence, recover_miss=False, del_single=False
+) -> NoteSequence:
+    ns_sorted = sorted(ns.notes, key=lambda note: note.pitch)
+    ns_joined = [ns_sorted[0]]
+    vels = [ns_sorted[0].velocity]
+
+    eps = 1e-6
+    min_time = ns_sorted[0].end_time - ns_sorted[0].start_time + eps
+    if recover_miss:
+        eps = min_time
+
+    for note in ns_sorted[1:]:
+        if (
+            ns_joined[-1].pitch == note.pitch
+            and note.start_time - ns_joined[-1].end_time < eps
+        ):
+            ns_joined[-1].end_time = note.end_time
+            vels.append(note.velocity)
+        else:
+            ns_joined[-1].velocity = round(np.mean(vels))
+            if (
+                del_single
+                and ns_joined[-1].end_time - ns_joined[-1].start_time < min_time
+            ):
+                del ns_joined[-1]
+
+            ns_joined.append(
+                NoteSequence.Note(
+                    pitch=note.pitch,
+                    velocity=note.velocity,
+                    start_time=note.start_time,
+                    end_time=note.end_time,
+                )
+            )
+            vels = [note.velocity]
+
+    if del_single and ns_joined[-1].end_time - ns_joined[-1].start_time < min_time:
+        del ns_joined[-1]
+    return NoteSequence(notes=ns_joined)
