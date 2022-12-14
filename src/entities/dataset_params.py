@@ -11,3 +11,5 @@ class DatasetParams:
     years_list: List[int]
     split: Optional[str]
     audio_params: AudioParams
+    feature_size: int
+    overlapping: int
