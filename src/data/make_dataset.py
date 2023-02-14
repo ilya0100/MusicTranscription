@@ -70,25 +70,29 @@ class WavMidiDataset(Dataset):
 
 
 class AudioDataset(Dataset):
-    def __init__(self, frames: np.ndarray, notes: Tuple[np.ndarray]) -> None:
+    def __init__(self, frames: np.ndarray, notes: Tuple[np.ndarray] = None) -> None:
         super().__init__()
 
-        assert frames.shape[0] == len(notes)
+        if notes:
+            assert frames.shape[0] == len(notes)
 
         self._frames = frames
         self._notes = notes
-        self._len = len(notes)
+        self._len = frames.shape[0]
 
     def __len__(self):
         return self._len
 
     def __getitem__(self, index):
         frames = np.expand_dims(self._frames[index], 0)
-        pitch = self._notes[index][0]
-        vels = self._notes[index][1]
-        notes_count = vels[vels > 0].size
-        if vels[vels > 0].size > 0:
-            vels = vels[vels > 0].mean()
+        if self._notes:
+            pitch = self._notes[index][0]
+            vels = self._notes[index][1]
+            notes_count = vels[vels > 0].size
+            if vels[vels > 0].size > 0:
+                vels = vels[vels > 0].mean()
+            else:
+                vels = 0
+            return frames, pitch, vels, notes_count
         else:
-            vels = 0
-        return frames, pitch, vels, notes_count
+            return frames

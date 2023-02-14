@@ -162,6 +162,102 @@ class Resnet2(nn.Module):
 #########################################################################################
 
 
+class Resnet3(nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.conv_layer1 = nn.Sequential(
+            nn.Conv2d(1, 16, 3, padding=1),
+            nn.Dropout(0.3),
+            nn.Tanh(),
+        )
+        self.conv_stack1 = nn.ModuleList([
+                nn.Sequential(
+                    nn.Conv2d(16, 16, 3, padding=1),
+                    nn.Dropout(0.3),
+                    nn.Tanh(),
+                    nn.Conv2d(16, 16, 3, padding=1),
+                    nn.Dropout(0.3),
+                    nn.Tanh(),
+                ) for _ in range(10)
+        ])
+        self.maxpool1 = nn.MaxPool2d((4, 1))
+
+        self.conv_layer2 = nn.Sequential(
+            nn.Conv2d(16, 32, 3, padding=1),
+            nn.Dropout(0.3),
+            nn.Tanh(),
+        )
+        self.conv_stack2 = nn.ModuleList([
+                nn.Sequential(
+                    nn.Conv2d(32, 32, 3, padding=1),
+                    nn.Dropout(0.3),
+                    nn.Tanh(),
+                    nn.Conv2d(32, 32, 3, padding=1),
+                    nn.Dropout(0.3),
+                    nn.Tanh(),
+                ) for _ in range(5)
+        ])
+        self.maxpool2 = nn.MaxPool2d((1, 3))
+        self.flatten = nn.Flatten()
+
+        self.pitch_layer = nn.Sequential(
+            nn.Linear(4096, 2048),
+            nn.Dropout(0.3),
+            nn.Tanh(),
+            nn.Linear(2048, 1024),
+            nn.Dropout(0.3),
+            nn.Tanh(),
+            nn.Linear(1024, 129),
+            nn.LogSoftmax(dim=1)
+        )
+
+        self.velocity_layer = nn.Sequential(
+            nn.Linear(4096, 2048),
+            nn.Dropout(0.3),
+            nn.Tanh(),
+            nn.Linear(2048, 1),
+        )
+        self.count_layer = nn.Sequential(
+            nn.Linear(4096, 1024),
+            nn.Dropout(0.3),
+            nn.Tanh(),
+            nn.Linear(1024, 1),
+        )
+        self.base = nn.ModuleList([
+            self.conv_layer1,
+            self.conv_stack1,
+            self.maxpool1,
+            self.conv_layer2,
+            self.conv_stack2,
+            self.maxpool2,
+            self.pitch_layer
+        ])
+
+    def forward(self, x: torch.Tensor):
+        x = self.conv_layer1(x)
+        for layer in self.conv_stack1:
+            x = layer(x) + x
+        x = self.maxpool1(x)
+
+        x = self.conv_layer2(x)
+        for layer in self.conv_stack2:
+            x = layer(x) + x
+        x = self.maxpool2(x)
+        x = self.flatten(x)
+
+        pitch = self.pitch_layer(x)
+        # with torch.no_grad():
+        velocity = self.velocity_layer(x.clone().detach())
+        notes_count = self.count_layer(x.clone().detach())
+        # velocity = torch.full((x.shape[0], 1), 80, device=device, dtype=float)
+        # notes_count = torch.full((x.shape[0], 1), 5, device=device, dtype=float)
+        return pitch, velocity, notes_count
+
+
+#########################################################################################
+
+
 class DummyNet(nn.Module):
     def __init__(self) -> None:
         super().__init__()
