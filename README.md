@@ -1,4 +1,4 @@
-AutomaticMusicTranscription
+MusicTranscription
 ==============================
 
 Automatic music transcription using neural networks
