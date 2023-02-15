@@ -1,12 +1,12 @@
 AutomaticMusicTranscription
 ==============================
 
-<h2 align="center"><img src="https://drive.google.com/file/d/1UNxc3mHPMJ3WcDF8n3Owc7W43chKrGwh/view?usp=share_link"></h2>
-<h2 align="center"><img src="https://drive.google.com/file/d/1eahG7N9v8UjgtOwoSLYf7Es7iyITYuj9/view?usp=share_link"></h2>
-<h2 align="center"><img src="https://drive.google.com/file/d/13UvWhHRPN7S_PBj7LrRGjA8M08eUIEZz/view?usp=share_link"></h2>
-<h2 align="center"><img src="https://drive.google.com/file/d/1Pq_6HU4bUZe77SEAP_g2mTJrf95HD2dg/view?usp=share_link"></h2>
-<h2 align="center"><img src="https://drive.google.com/file/d/1fX18UN0n3_mFdJFpJmZuno3L4c-UQ-Kf/view?usp=share_link"></h2>
-<h2 align="center"><img src="https://drive.google.com/file/d/1fspbzmknx9rp8F_7qWCvY1NrPkhmj8Tr/view?usp=share_link"></h2>
+<h2 align="center"><img src="https://github.com/ilya0100/MusicTranscription/blob/72477b5f4db3d18be81c5c386d4c729028486088/readme/1.png"></h2>
+<h2 align="center"><img src="https://github.com/ilya0100/MusicTranscription/blob/72477b5f4db3d18be81c5c386d4c729028486088/readme/2.png"></h2>
+<h2 align="center"><img src="https://github.com/ilya0100/MusicTranscription/blob/72477b5f4db3d18be81c5c386d4c729028486088/readme/3.png"></h2>
+<h2 align="center"><img src="https://github.com/ilya0100/MusicTranscription/blob/72477b5f4db3d18be81c5c386d4c729028486088/readme/4.png"></h2>
+<h2 align="center"><img src="https://github.com/ilya0100/MusicTranscription/blob/72477b5f4db3d18be81c5c386d4c729028486088/readme/5.png"></h2>
+<h2 align="center"><img src="https://github.com/ilya0100/MusicTranscription/blob/72477b5f4db3d18be81c5c386d4c729028486088/readme/6.png"></h2>
 
 [Predict_v1](https://drive.google.com/file/d/1QX3fVzG-JrFjh37t3Xe0hCk2FIZ98SBx/view?usp=share_link)
 
