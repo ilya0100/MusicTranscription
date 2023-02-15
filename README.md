@@ -1,5 +1,6 @@
 AutomaticMusicTranscription
 ==============================
+Detail project description in [presentation](https://my.visme.co/preview/kkd89py0-untitled-project?isPreview=1&t=e67accacf3d32171e79097a32d87b1d3#s1)
 
 Automatic music transcription using neural networks
 
