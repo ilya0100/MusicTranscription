@@ -1,6 +1,15 @@
 AutomaticMusicTranscription
 ==============================
 
+<h2 align="center"><img src="https://github.com/ilya0100/MusicTranscription/blob/72477b5f4db3d18be81c5c386d4c729028486088/readme/1.png"></h2>
+<h2 align="center"><img src="https://github.com/ilya0100/MusicTranscription/blob/72477b5f4db3d18be81c5c386d4c729028486088/readme/2.png"></h2>
+<h2 align="center"><img src="https://github.com/ilya0100/MusicTranscription/blob/72477b5f4db3d18be81c5c386d4c729028486088/readme/3.png"></h2>
+<h2 align="center"><img src="https://github.com/ilya0100/MusicTranscription/blob/72477b5f4db3d18be81c5c386d4c729028486088/readme/4.png"></h2>
+<h2 align="center"><img src="https://github.com/ilya0100/MusicTranscription/blob/72477b5f4db3d18be81c5c386d4c729028486088/readme/5.png"></h2>
+<h2 align="center"><img src="https://github.com/ilya0100/MusicTranscription/blob/72477b5f4db3d18be81c5c386d4c729028486088/readme/6.png"></h2>
+
+[Predict_v1](https://drive.google.com/file/d/1QX3fVzG-JrFjh37t3Xe0hCk2FIZ98SBx/view?usp=share_link)
+
 Automatic music transcription using neural networks
 
 Installation
@@ -9,6 +18,13 @@ Installation
 
 ```bash
 sudo apt-get install build-essential libasound2-dev libjack-dev portaudio19-dev
+```
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+python setup.py install
 ```
 
 Data

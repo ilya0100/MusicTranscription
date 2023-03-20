@@ -1,30 +1,98 @@
-# -*- coding: utf-8 -*-
-import click
-import logging
-from pathlib import Path
-from dotenv import find_dotenv, load_dotenv
+import os
+import numpy as np
+import pandas as pd
+import librosa
+import note_seq
+
+from typing import Iterable, Tuple
+from torch.utils.data import Dataset
+
+from src.entities.dataset_params import DatasetParams
+from src.entities.audio_params import AudioParams
+from src.features.build_features import make_spectrogram, split_spectrogram, tokenize
 
 
-@click.command()
-@click.argument('input_filepath', type=click.Path(exists=True))
-@click.argument('output_filepath', type=click.Path())
-def main(input_filepath, output_filepath):
-    """ Runs data processing scripts to turn raw data from (../raw) into
-        cleaned data ready to be analyzed (saved in ../processed).
-    """
-    logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
+class WavMidiDataset(Dataset):
+    def __init__(self, params: DatasetParams) -> None:
+        super().__init__()
+
+        self._root_path = params.root_path
+        self._years = params.years_list
+        self._split = params.split
+        self._params = params
+
+        self._hop_length = params.audio_params.frame_length // params.overlapping
+        self._frame_time = (
+            self._hop_length * params.feature_size / params.audio_params.sample_rate
+        )
+
+        metadata_path = os.path.join(self._root_path, params.metadata)
+        ds_metadata = pd.read_csv(metadata_path)
+
+        if self._split:
+            ds_metadata = ds_metadata[ds_metadata["split"] == self._split]
+        if len(self._years) > 0:
+            ds_metadata = ds_metadata[
+                ds_metadata["year"].map(lambda x: x in self._years)
+            ]
+
+        ds_metadata = ds_metadata[["midi_filename", "audio_filename"]]
+
+        self._len = ds_metadata.shape[0]
+        self._data = ds_metadata
+
+    def __len__(self):
+        return self._len
+
+    def __getitem__(self, idx) -> Tuple[np.ndarray, Tuple[np.ndarray]]:
+        midi_filename, audio_filename = self._data.iloc[idx]
+
+        midi_path = os.path.join(self._root_path, midi_filename)
+        audio_path = os.path.join(self._root_path, audio_filename)
+
+        frames = self._process_audio(audio_path, self._params.audio_params)
+        times = [self._frame_time * i for i in range(frames.shape[0])]
+
+        notes = self._process_midi(midi_path, times)
+        assert len(times) == len(notes)
+
+        return frames, notes, times
+
+    def _process_audio(self, audio_path: str, params: AudioParams):
+        signal, _ = librosa.load(audio_path, sr=params.sample_rate)
+        spectrogram = make_spectrogram(signal, params, self._hop_length)
+        frames = split_spectrogram(spectrogram, self._params.feature_size)
+        return frames
+
+    def _process_midi(self, midi_path: str, times: Iterable[float]):
+        ns = note_seq.midi_file_to_note_sequence(midi_path)
+        return tokenize(ns, times, self._frame_time)
 
 
-if __name__ == '__main__':
-    log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(level=logging.INFO, format=log_fmt)
+class AudioDataset(Dataset):
+    def __init__(self, frames: np.ndarray, notes: Tuple[np.ndarray] = None) -> None:
+        super().__init__()
 
-    # not used in this stub but often useful for finding various files
-    project_dir = Path(__file__).resolve().parents[2]
+        if notes:
+            assert frames.shape[0] == len(notes)
 
-    # find .env automagically by walking up directories until it's found, then
-    # load up the .env entries as environment variables
-    load_dotenv(find_dotenv())
+        self._frames = frames
+        self._notes = notes
+        self._len = frames.shape[0]
 
-    main()
+    def __len__(self):
+        return self._len
+
+    def __getitem__(self, index):
+        frames = np.expand_dims(self._frames[index], 0)
+        if self._notes:
+            pitch = self._notes[index][0]
+            vels = self._notes[index][1]
+            notes_count = vels[vels > 0].size
+            if vels[vels > 0].size > 0:
+                vels = vels[vels > 0].mean()
+            else:
+                vels = 0
+            return frames, pitch, vels, notes_count
+        else:
+            return frames
